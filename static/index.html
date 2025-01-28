@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summarization Interface</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #inputText {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 auto;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        #outputSummary {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            line-height: 1.6;
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Summarize Text</h1>
+    <textarea id="inputText" rows="10" placeholder="Enter your paragraph here..."></textarea>
+    <button onclick="summarizeText()" id="summarizeBtn">
+        <span class="btn-text">Summarize</span>
+    </button>
+    <h2>Summary:</h2>
+    <p id="outputSummary"></p>
+
+    <script>
+        async function summarizeText() {
+            const btn = document.getElementById('summarizeBtn');
+            const inputText = document.getElementById("inputText").value;
+
+            btn.disabled = true;
+            btn.innerHTML = `
+                <div class="loader"></div>
+                <span class="btn-text">Summarizing...</span>
+            `;
+
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: inputText }),
+                });
+
+                const data = await response.json();
+                document.getElementById("outputSummary").innerText = data.summary;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById("outputSummary").innerText =
+                    "Error generating summary. Please try again.";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <span class="btn-text">Summarize</span>
+                `;
+            }
+        }
+    </script>
+</body>
+
+</html>
